@@ -5,6 +5,8 @@ import { WebrtcProvider } from "y-webrtc";
 const App = () => {
   const [showFriend, setShowFriend] = useState(false);
   const [remoteCursors, setRemoteCursors] = useState([]);
+  const [peerCount, setPeerCount] = useState(0);
+  const [connectionStatus, setConnectionStatus] = useState("connecting");
   const awarenessRef = useRef(null);
   const localIdRef = useRef(null);
   const localColorRef = useRef(null);
@@ -73,11 +75,24 @@ const App = () => {
       setRemoteCursors(cursors);
     };
 
+    const handleStatus = (event) => {
+      setConnectionStatus(event.connected ? "connected" : "disconnected");
+    };
+
+    const handlePeers = (event) => {
+      const count = event.webrtcPeers.length + event.bcPeers.length;
+      setPeerCount(count);
+    };
+
     awareness.on("change", handleAwarenessChange);
+    provider.on("status", handleStatus);
+    provider.on("peers", handlePeers);
     handleAwarenessChange();
 
     return () => {
       awareness.off("change", handleAwarenessChange);
+      provider.off("status", handleStatus);
+      provider.off("peers", handlePeers);
       provider.destroy();
       doc.destroy();
     };
@@ -130,6 +145,9 @@ const App = () => {
             }}
           />
         ))}
+      </div>
+      <div className="status">
+        Multiplayer: {connectionStatus} · Peers: {peerCount}
       </div>
     </main>
   );
