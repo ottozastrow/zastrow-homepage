@@ -9,6 +9,7 @@ const App = () => {
   const [connectionStatus, setConnectionStatus] = useState("connecting");
   const [unlockProgress, setUnlockProgress] = useState("");
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const [flashImage, setFlashImage] = useState(null);
   const awarenessRef = useRef(null);
   const localIdRef = useRef(null);
   const localColorRef = useRef(null);
@@ -76,6 +77,37 @@ const App = () => {
     window.addEventListener("keydown", onKeyDown);
     return () => {
       window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isUnlocked]);
+
+  useEffect(() => {
+    if (!isUnlocked) {
+      return;
+    }
+    const triggers = ["i am otto", "i am beanius"];
+    let buffer = "";
+    let flashTimer = null;
+
+    const onKeyDown = (event) => {
+      if (event.key.length !== 1) {
+        return;
+      }
+      buffer = (buffer + event.key.toLowerCase()).slice(-30);
+      const match = triggers.find((trigger) => buffer.includes(trigger));
+      if (match) {
+        setFlashImage(match);
+        clearTimeout(flashTimer);
+        flashTimer = setTimeout(() => {
+          setFlashImage(null);
+        }, 5000);
+        buffer = "";
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      clearTimeout(flashTimer);
     };
   }, [isUnlocked]);
 
@@ -243,6 +275,15 @@ const App = () => {
             Multiplayer: {connectionStatus} · Peers: {peerCount}
           </div>
         </>
+      )}
+      {flashImage && (
+        <div className="flash-overlay" role="status" aria-live="polite">
+          <img
+            className="flash-image"
+            alt={`Placeholder for ${flashImage}`}
+            src={`data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='640' height='360' viewBox='0 0 640 360'><defs><linearGradient id='g' x1='0' x2='1' y1='0' y2='1'><stop offset='0' stop-color='%23222'/><stop offset='1' stop-color='%23555555'/></linearGradient></defs><rect width='640' height='360' fill='url(%23g)'/><rect x='24' y='24' width='592' height='312' rx='18' fill='%23ffffff' opacity='0.1'/><text x='50%' y='50%' fill='%23ffffff' font-size='28' font-family='Arial, sans-serif' text-anchor='middle'>${flashImage.toUpperCase()}</text><text x='50%' y='62%' fill='%23ffffff' font-size='16' font-family='Arial, sans-serif' text-anchor='middle'>placeholder image</text></svg>`}
+          />
+        </div>
       )}
     </main>
   );
