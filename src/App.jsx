@@ -51,7 +51,7 @@ const App = () => {
   }, []);
 
   useEffect(() => {
-    const password = "urkel groobe";
+    const password = "urkel grue";
 
     const onKeyDown = (event) => {
       if (isUnlocked) {
