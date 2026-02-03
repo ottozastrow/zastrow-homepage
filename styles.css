@@ -9,6 +9,14 @@ body {
   cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none' stroke='%23222' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='10' cy='3.5' r='2' fill='%23222' stroke='none'/><path d='M10 5.5 L10 11'/><path d='M7 8.5 L13 8.5'/><path d='M10 11 L7 16'/><path d='M10 11 L13 16'/></svg>") 10 10, auto;
 }
 
+body.cursor-step-b {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none' stroke='%23222' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='10' cy='3.5' r='2' fill='%23222' stroke='none'/><path d='M10 5.5 L10 11'/><path d='M7 8.5 L13 8.5'/><path d='M10 11 L6 14'/><path d='M10 11 L14 17'/></svg>") 10 10, auto;
+}
+
+body.cursor-step-b {
+  cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='none' stroke='%23222' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'><circle cx='10' cy='3.5' r='2' fill='%23222' stroke='none'/><path d='M10 5.5 L10 11'/><path d='M7 8.5 L13 8.5'/><path d='M10 11 L6 14.5'/><path d='M10 11 L14 16.5'/></svg>") 10 10, auto;
+}
+
 .page {
   min-height: 100vh;
   display: grid;
