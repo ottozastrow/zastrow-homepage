@@ -59,7 +59,18 @@ const App = () => {
   useEffect(() => {
     const doc = new Y.Doc();
     const roomName = "zastrow-homepage-cursors";
-    const provider = new WebrtcProvider(roomName, doc);
+    const provider = new WebrtcProvider(roomName, doc, {
+      signaling: [
+        "wss://signaling.yjs.dev",
+        "wss://y-webrtc-signaling-eu.herokuapp.com",
+        "wss://y-webrtc-signaling-us.herokuapp.com",
+      ],
+      peerOpts: {
+        config: {
+          iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+        },
+      },
+    });
     const awareness = provider.awareness;
 
     awarenessRef.current = awareness;
