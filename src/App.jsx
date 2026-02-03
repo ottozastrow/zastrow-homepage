@@ -240,7 +240,7 @@ const App = () => {
           className={`secret-walker ${
             unlockProgress.length > 0 ? "secret-walker--visible" : ""
           }`}
-          style={{ transform: `translateX(-${inchDistance}px)` }}
+          style={{ transform: `translateX(${inchDistance}px)` }}
           aria-hidden="true"
         />
       )}
