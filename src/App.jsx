@@ -77,26 +77,20 @@ const App = () => {
         .filter(Boolean)
         .filter((cursor) => cursor.clientId !== localIdRef.current);
       setRemoteCursors(cursors);
+      setPeerCount(Math.max(0, states.length - 1));
     };
 
     const handleStatus = (event) => {
-      setConnectionStatus(event.connected ? "connected" : "disconnected");
-    };
-
-    const handlePeers = (event) => {
-      const count = event.webrtcPeers.length + event.bcPeers.length;
-      setPeerCount(count);
+      setConnectionStatus(event.status || "disconnected");
     };
 
     awareness.on("change", handleAwarenessChange);
     provider.on("status", handleStatus);
-    provider.on("peers", handlePeers);
     handleAwarenessChange();
 
     return () => {
       awareness.off("change", handleAwarenessChange);
       provider.off("status", handleStatus);
-      provider.off("peers", handlePeers);
       provider.destroy();
       doc.destroy();
     };
