@@ -36,6 +36,48 @@ h1 {
   z-index: 1;
 }
 
+.secret-walker {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  width: 18px;
+  height: 26px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+.secret-walker--visible {
+  opacity: 1;
+}
+
+.secret-walker::before,
+.secret-walker::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.secret-walker::before {
+  top: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #222;
+}
+
+.secret-walker::after {
+  top: 7px;
+  width: 10px;
+  height: 18px;
+  border-left: 2px solid #222;
+  border-right: 2px solid #222;
+  border-bottom: 2px solid #222;
+  border-top: 2px solid #222;
+  clip-path: polygon(50% 0, 100% 100%, 65% 100%, 50% 60%, 35% 100%, 0 100%);
+}
+
 .cursor-layer {
   position: fixed;
   inset: 0;

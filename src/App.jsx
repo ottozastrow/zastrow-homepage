@@ -7,6 +7,8 @@ const App = () => {
   const [remoteCursors, setRemoteCursors] = useState([]);
   const [peerCount, setPeerCount] = useState(0);
   const [connectionStatus, setConnectionStatus] = useState("connecting");
+  const [unlockProgress, setUnlockProgress] = useState("");
+  const [isUnlocked, setIsUnlocked] = useState(false);
   const awarenessRef = useRef(null);
   const localIdRef = useRef(null);
   const localColorRef = useRef(null);
@@ -47,6 +49,35 @@ const App = () => {
       clearInterval(walkTimer);
     };
   }, []);
+
+  useEffect(() => {
+    const password = "urkel groobe";
+
+    const onKeyDown = (event) => {
+      if (isUnlocked) {
+        return;
+      }
+      if (event.key === "Backspace") {
+        setUnlockProgress((prev) => prev.slice(0, -1));
+        return;
+      }
+      if (event.key.length !== 1) {
+        return;
+      }
+      setUnlockProgress((prev) => {
+        const next = (prev + event.key).slice(0, password.length);
+        if (next.toLowerCase() === password) {
+          setIsUnlocked(true);
+        }
+        return next;
+      });
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [isUnlocked]);
 
   useEffect(() => {
     document.body.classList.toggle("cursor-with-friend", showFriend);
@@ -168,36 +199,51 @@ const App = () => {
     };
   }, []);
 
+  const inchDistance = Math.min(unlockProgress.length * 2, 120);
+
   return (
     <main className="page">
-      <h1>
-        Hi from Otto{" "}
-        <button
-          type="button"
-          className="ampersand-toggle"
-          onClick={() => setShowFriend(true)}
-          aria-label="Show Beanius"
-        >
-          &amp;
-        </button>{" "}
-        Beanius
-      </h1>
-      <div className="cursor-layer" aria-hidden="true">
-        {remoteCursors.map((cursor) => (
-          <div
-            key={cursor.id}
-            className="remote-cursor"
-            style={{
-              left: `${cursor.x}px`,
-              top: `${cursor.y}px`,
-              background: cursor.color,
-            }}
-          />
-        ))}
-      </div>
-      <div className="status">
-        Multiplayer: {connectionStatus} · Peers: {peerCount}
-      </div>
+      {!isUnlocked && (
+        <div
+          className={`secret-walker ${
+            unlockProgress.length > 0 ? "secret-walker--visible" : ""
+          }`}
+          style={{ transform: `translate(-${inchDistance}px, -${inchDistance}px)` }}
+          aria-hidden="true"
+        />
+      )}
+      {isUnlocked && (
+        <>
+          <h1>
+            Hi from Otto{" "}
+            <button
+              type="button"
+              className="ampersand-toggle"
+              onClick={() => setShowFriend(true)}
+              aria-label="Show Beanius"
+            >
+              &amp;
+            </button>{" "}
+            Beanius
+          </h1>
+          <div className="cursor-layer" aria-hidden="true">
+            {remoteCursors.map((cursor) => (
+              <div
+                key={cursor.id}
+                className="remote-cursor"
+                style={{
+                  left: `${cursor.x}px`,
+                  top: `${cursor.y}px`,
+                  background: cursor.color,
+                }}
+              />
+            ))}
+          </div>
+          <div className="status">
+            Multiplayer: {connectionStatus} · Peers: {peerCount}
+          </div>
+        </>
+      )}
     </main>
   );
 };
