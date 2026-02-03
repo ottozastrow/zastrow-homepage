@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as Y from "yjs";
-import { WebrtcProvider } from "y-webrtc";
+import { WebsocketProvider } from "y-websocket";
 
 const App = () => {
   const [showFriend, setShowFriend] = useState(false);
@@ -59,18 +59,11 @@ const App = () => {
   useEffect(() => {
     const doc = new Y.Doc();
     const roomName = "zastrow-homepage-cursors";
-    const provider = new WebrtcProvider(roomName, doc, {
-      signaling: [
-        "wss://signaling.yjs.dev",
-        "wss://y-webrtc-signaling-eu.herokuapp.com",
-        "wss://y-webrtc-signaling-us.herokuapp.com",
-      ],
-      peerOpts: {
-        config: {
-          iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-        },
-      },
-    });
+    const provider = new WebsocketProvider(
+      "wss://demos.yjs.dev",
+      roomName,
+      doc
+    );
     const awareness = provider.awareness;
 
     awarenessRef.current = awareness;
