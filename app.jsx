@@ -4,6 +4,8 @@ const App = () => {
   const [showFriend, setShowFriend] = useState(false);
   const [remoteCursors, setRemoteCursors] = useState([]);
   const awarenessRef = useRef(null);
+  const localIdRef = useRef(null);
+  const localColorRef = useRef(null);
 
   useEffect(() => {
     let step = false;
@@ -51,17 +53,32 @@ const App = () => {
   }, [showFriend]);
 
   useEffect(() => {
-    const doc = new Y.Doc();
+    const Yjs = window.Y;
+    const WebrtcProvider =
+      window.WebrtcProvider ||
+      (window.ywebrtc && window.ywebrtc.WebrtcProvider) ||
+      (window.yWebrtc && window.yWebrtc.WebrtcProvider) ||
+      (Yjs && Yjs.WebrtcProvider);
+
+    if (!Yjs || !Yjs.Doc || !WebrtcProvider) {
+      console.warn("Realtime cursors unavailable: Yjs/WebRTC not loaded.");
+      return;
+    }
+
+    const doc = new Yjs.Doc();
     const roomName = "zastrow-homepage-cursors";
-    const provider = new Y.WebrtcProvider(roomName, doc);
+    const provider = new WebrtcProvider(roomName, doc);
     const awareness = provider.awareness;
     awarenessRef.current = awareness;
+    localIdRef.current = awareness.clientID;
+    localColorRef.current = `hsl(${awareness.clientID * 137.5}, 60%, 45%)`;
 
     const handleAwarenessChange = () => {
       const states = Array.from(awareness.getStates().values());
       const cursors = states
         .map((state) => state.cursor)
-        .filter(Boolean);
+        .filter(Boolean)
+        .filter((cursor) => cursor.clientId !== localIdRef.current);
       setRemoteCursors(cursors);
     };
 
@@ -83,8 +100,10 @@ const App = () => {
       }
       awareness.setLocalStateField("cursor", {
         id: awareness.clientID,
+        clientId: awareness.clientID,
         x: event.clientX,
         y: event.clientY,
+        color: localColorRef.current,
       });
     };
 
@@ -113,7 +132,11 @@ const App = () => {
           <div
             key={cursor.id}
             className="remote-cursor"
-            style={{ transform: `translate(${cursor.x}px, ${cursor.y}px)` }}
+            style={{
+              left: `${cursor.x}px`,
+              top: `${cursor.y}px`,
+              background: cursor.color,
+            }}
           />
         ))}
       </div>
