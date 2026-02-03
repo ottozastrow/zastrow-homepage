@@ -59,20 +59,67 @@ const App = () => {
   useEffect(() => {
     const doc = new Y.Doc();
     const roomName = "zastrow-homepage-cursors";
-    const provider = new WebsocketProvider(
+    const servers = [
       "wss://demos.yjs.dev",
-      roomName,
-      doc
-    );
-    const awareness = provider.awareness;
+      "wss://yjs-server.herokuapp.com",
+    ];
+    let serverIndex = 0;
+    let provider = null;
+    let awareness = null;
     let statusTimer = null;
     let connectTimeout = null;
+    let handleStatus = null;
 
-    awarenessRef.current = awareness;
-    localIdRef.current = awareness.clientID;
-    localColorRef.current = `hsl(${awareness.clientID * 137.5}, 60%, 45%)`;
+    const createProvider = () => {
+      if (awareness) {
+        awareness.off("change", handleAwarenessChange);
+      }
+      if (provider && handleStatus) {
+        provider.off("status", handleStatus);
+        provider.destroy();
+      }
+      const serverUrl = servers[serverIndex % servers.length];
+      provider = new WebsocketProvider(serverUrl, roomName, doc);
+      awareness = provider.awareness;
+      awarenessRef.current = awareness;
+      localIdRef.current = awareness.clientID;
+      setConnectionStatus(`connecting (${serverUrl})`);
+
+      handleStatus = (event) => {
+        const statusText = event.status || "disconnected";
+        setConnectionStatus(`${statusText} (${serverUrl})`);
+        if (event.status === "disconnected") {
+          serverIndex += 1;
+          clearTimeout(connectTimeout);
+          connectTimeout = setTimeout(createProvider, 500);
+        }
+      };
+
+      awareness.on("change", handleAwarenessChange);
+      provider.on("status", handleStatus);
+
+      clearInterval(statusTimer);
+      statusTimer = setInterval(() => {
+        setConnectionStatus(
+          provider.wsconnected
+            ? `connected (${serverUrl})`
+            : `disconnected (${serverUrl})`
+        );
+      }, 1000);
+
+      clearTimeout(connectTimeout);
+      connectTimeout = setTimeout(() => {
+        if (!provider.wsconnected) {
+          serverIndex += 1;
+          createProvider();
+        }
+      }, 5000);
+    };
 
     const handleAwarenessChange = () => {
+      if (!awareness) {
+        return;
+      }
       const states = Array.from(awareness.getStates().values());
       const cursors = states
         .map((state) => state.cursor)
@@ -82,30 +129,20 @@ const App = () => {
       setPeerCount(Math.max(0, states.length - 1));
     };
 
-    const handleStatus = (event) => {
-      setConnectionStatus(event.status || "disconnected");
-    };
-
-    awareness.on("change", handleAwarenessChange);
-    provider.on("status", handleStatus);
+    createProvider();
     handleAwarenessChange();
-
-    statusTimer = setInterval(() => {
-      setConnectionStatus(provider.wsconnected ? "connected" : "disconnected");
-    }, 1000);
-
-    connectTimeout = setTimeout(() => {
-      if (!provider.wsconnected) {
-        setConnectionStatus("disconnected");
-      }
-    }, 5000);
+    localColorRef.current = `hsl(${Math.random() * 360}, 60%, 45%)`;
 
     return () => {
-      awareness.off("change", handleAwarenessChange);
-      provider.off("status", handleStatus);
+      if (awareness) {
+        awareness.off("change", handleAwarenessChange);
+      }
+      if (provider && handleStatus) {
+        provider.off("status", handleStatus);
+        provider.destroy();
+      }
       clearInterval(statusTimer);
       clearTimeout(connectTimeout);
-      provider.destroy();
       doc.destroy();
     };
   }, []);
