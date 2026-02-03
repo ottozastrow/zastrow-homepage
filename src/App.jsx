@@ -65,6 +65,8 @@ const App = () => {
       doc
     );
     const awareness = provider.awareness;
+    let statusTimer = null;
+    let connectTimeout = null;
 
     awarenessRef.current = awareness;
     localIdRef.current = awareness.clientID;
@@ -88,9 +90,21 @@ const App = () => {
     provider.on("status", handleStatus);
     handleAwarenessChange();
 
+    statusTimer = setInterval(() => {
+      setConnectionStatus(provider.wsconnected ? "connected" : "disconnected");
+    }, 1000);
+
+    connectTimeout = setTimeout(() => {
+      if (!provider.wsconnected) {
+        setConnectionStatus("disconnected");
+      }
+    }, 5000);
+
     return () => {
       awareness.off("change", handleAwarenessChange);
       provider.off("status", handleStatus);
+      clearInterval(statusTimer);
+      clearTimeout(connectTimeout);
       provider.destroy();
       doc.destroy();
     };
