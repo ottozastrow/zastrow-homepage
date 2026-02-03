@@ -1,4 +1,6 @@
-const { useEffect, useRef, useState } = React;
+import { useEffect, useRef, useState } from "react";
+import * as Y from "yjs";
+import { WebrtcProvider } from "y-webrtc";
 
 const App = () => {
   const [showFriend, setShowFriend] = useState(false);
@@ -53,22 +55,11 @@ const App = () => {
   }, [showFriend]);
 
   useEffect(() => {
-    const Yjs = window.Y;
-    const WebrtcProvider =
-      window.WebrtcProvider ||
-      (window.ywebrtc && window.ywebrtc.WebrtcProvider) ||
-      (window.yWebrtc && window.yWebrtc.WebrtcProvider) ||
-      (Yjs && Yjs.WebrtcProvider);
-
-    if (!Yjs || !Yjs.Doc || !WebrtcProvider) {
-      console.warn("Realtime cursors unavailable: Yjs/WebRTC not loaded.");
-      return;
-    }
-
-    const doc = new Yjs.Doc();
+    const doc = new Y.Doc();
     const roomName = "zastrow-homepage-cursors";
     const provider = new WebrtcProvider(roomName, doc);
     const awareness = provider.awareness;
+
     awarenessRef.current = awareness;
     localIdRef.current = awareness.clientID;
     localColorRef.current = `hsl(${awareness.clientID * 137.5}, 60%, 45%)`;
@@ -144,5 +135,4 @@ const App = () => {
   );
 };
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<App />);
+export default App;
